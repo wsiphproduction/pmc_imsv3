@@ -1,0 +1,358 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Input;
+use Carbon\Carbon;
+use Auth;
+use DB;
+
+use App\logistics;
+use App\PO;
+use App\drr;
+// use App\Mail\Customcleared;
+// use Illuminate\Support\Facades\Mail;
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+class LogisticsController extends Controller
+{
+    public function dashboard()
+    {
+        return view('logistics.dashboard');
+    }
+
+    public function shipment_summary_filter()
+    {
+        $params = Input::all();
+
+        return $this->shipment_summary($params);
+    }
+
+    public function shipment_summary($param = null)
+    {
+        $datas = logistics::where('status','Delivered');
+
+        $pageLimit = 10;
+
+        if(isset($param)){
+
+            $datas->whereBetween('actualDeliveryDate',["".date('Y-m-d',strtotime($param['from']))."","".date('Y-m-d',strtotime($param['to'])).""])
+                ->orderBy('actualDeliveryDate','desc');
+
+        } else {
+
+            $param = [];
+            $datas->whereBetween('actualDeliveryDate',[Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])->orderBy('actualDeliveryDate','desc');
+
+        }
+
+        $datas = $datas->paginate($pageLimit);
+
+        return view('logistics.shipment_summary',compact('datas','param'));
+    }
+
+    public function filter()
+    {
+        $params = Input::all();
+
+        return $this->shipment_kpi($params);
+    }
+
+    public function shipment_kpi($param = null)
+    {
+        $datas = logistics::where('status','Delivered');
+
+        $pageLimit = 10;
+
+        if(isset($param)){
+
+            $datas->whereBetween('actualDeliveryDate',["".date('Y-m-d',strtotime($param['from']))."","".date('Y-m-d',strtotime($param['to'])).""])
+                ->orderBy('actualDeliveryDate','desc');
+
+        } else {
+
+            $param = [];
+            $datas->whereBetween('actualDeliveryDate',[Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])->orderBy('actualDeliveryDate','desc');
+
+        }
+
+        $datas = $datas->paginate($pageLimit);
+
+        return view('logistics.shipment_kpi',compact('datas','param'));
+    }
+
+    public function rr_summary()
+    {
+        $pendings = logistics::whereNotExists(function($query){
+                $query->select(DB::raw(1))->from('drr')->whereRaw('logistics.waybill = drr.waybill');
+            })
+            ->where('status','Delivered')
+            ->orderBy('actualDeliveryDate','asc')
+            ->get();
+
+        $datas = drr::where('waybill','<>','services')->whereBetween('drrDate',[Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])->get();
+
+        return view('logistics.rr_summary',compact('datas','pendings'));
+    }
+    
+    public function filter_completion()
+    {
+        $params = Input::all();
+
+        return $this->completion($params);
+    }
+    public function completion($param = NULL)
+    {
+        $collection = PO::where('status','OPEN');
+
+
+        if(isset($param)){
+
+            if(isset($param['from'])){
+                $collection->whereBetween('expectedCompletionDate',["".date('Y-m-d',strtotime($param['from']))."","".date('Y-m-d',strtotime($param['to'])).""])
+                    ->orderBy('expectedCompletionDate','asc');
+            }
+
+        } else {
+
+            $param = [];
+            $collection->whereBetween('expectedCompletionDate',[Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])->orderBy('expectedCompletionDate','asc');
+
+        }
+
+        $collection = $collection->get();
+
+        return view('logistics.completion_dt',compact('collection','param'));
+
+    }
+
+
+    public function create($id)
+    {
+        $poId = $id;
+        return view('logistics.create',compact('poId'));
+    }
+
+    public function waybills($id)
+    {   
+        $poId = $id;
+        $waybills = logistics::where('poId',$id)->get();
+
+        return view('logistics.waybills',compact('waybills','poId'));
+    }
+
+    public function store(Request $req)
+    {
+        $data  = $req->all();
+        $dates = $data['dates'];
+
+        foreach($dates as $key => $i){
+            $delivery = new logistics();
+            $delivery->waybill = 'shipment';
+            $delivery->poId = $req->poid;
+            $delivery->expectedDeliveryDate = $i;
+            $delivery->log_type = $req->rcounter == $key ? 'full' : 'partial';
+            $delivery->status = 'Pending';
+            $delivery->addedBy = Auth::user()->domainAccount;
+            $delivery->save(); 
+        }
+
+        $notification = array(
+            'message' => 'Shipment schedule successfully saved.', 
+            'alert-type' => 'success'
+        );  
+        
+        return redirect()->route('view.shipment.schedule',$req->poid)->with('notification',$notification);
+
+    }
+
+    public function edit($id)
+    {
+        $shipments = logistics::where('poId',$id)->get();
+        $counter = count($shipments);
+        $poId = $id;
+
+        return view('logistics.edit',compact('shipments','counter','poId'));
+    }
+
+    public function update(Request $req)
+    {
+        $data = $req->all();
+        $ids  = $data['ship_id'];
+        $type = $data['log_type'];
+        $waybill = $data['waybill'];
+        $dates = $data['dates'];
+
+        foreach($ids as $key => $i){
+            if($i == 'new'){
+                logistics::create([
+                    'log_type' => $type[$key],
+                    'waybill' => $waybill[$key],
+                    'expectedDeliveryDate' => $dates[$key],
+                    'poId' => $req->poid,
+                    'status' => 'Pending'
+                ]);
+            } else {
+                logistics::where('id',$i)->update([
+                    'log_type' => $type[$key],
+                    'waybill' => $waybill[$key],
+                    'expectedDeliveryDate' => $dates[$key],
+                ]);
+            }
+        }
+
+        $notification = array(
+            'message' => 'Shipment schedule successfully updated.', 
+            'alert-type' => 'info'
+        );
+
+        return back()->with('notification',$notification);
+    }
+
+     public function delete($id) {
+
+        $shipment = logistics::find($id);
+        $shipment->delete();
+        return "true";
+
+    }
+
+    public function addWaybill(Request $req){
+        $logistics = logistics::find($req->shipment_id);
+
+
+        $waybill = logistics::where('id',$req->shipment_id)->update([
+            'actualManufacturingDate' => $req->manufacture_dt,
+            'waybill' => $req->waybill,
+            'departure_dt' => $req->departure_dt,
+            'status' => 'In-Transit',
+            'addedBy' => Auth::user()->domainAccount
+        ]);
+
+        $notification = array(
+            'message' => 'Waybill successfully updated', 
+            'alert-type' => 'success'
+        );
+        
+        return back()->with('notification',$notification);
+
+    }
+
+    public function inTransit(Request $req){
+
+        $waybill = logistics::where('id',$req->shipment_id)->update([
+            'portArrivalDate' => $req->arrival_dt,
+            'addedBy' => Auth::user()->domainAccount
+        ]);
+
+        $notification = array(
+            'message' => 'Shipment status successfully updated', 
+            'alert-type' => 'success'
+        );
+        $this->send_email($req->shipment_id, 'In-transit');
+        return back()->with('notification',$notification);
+
+    }
+
+    public function customClearing(Request $req){   
+
+        $data = logistics::find($req->shipment_id);
+        $data->customStartDate = $req->start;
+        $data->customClearedDate = $req->cleared;
+        $data->status = 'Custom Clearing';
+        $data->save();
+
+  
+       
+        $notification = array(
+            'message' => 'Shipment status successfully updated.', 
+            'alert-type' => 'success'
+        );
+        $this->send_email($req->shipment_id, 'Customs Clearing');
+        return back()->with('notification',$notification);
+
+    }
+
+    public function pickUp(Request $req){   
+        
+        
+        $data = logistics::find($req->shipment_id);
+        $data->status = 'For Pick-Up';
+        $data->save();
+
+        $notification = array(
+            'message' => 'Shipment status successfully updated.', 
+            'alert-type' => 'success'
+        );
+        $this->send_email($req->shipment_id, 'Pickup');
+        return back()->with('notification',$notification);
+
+    }
+
+    public function delivered(Request $req)
+    {
+        $data = logistics::find($req->shipment_id);
+        $data->actualDeliveryDate = $req->delivered_dt;
+        $data->status = 'Delivered';
+        $data->addedBy = Auth::user()->domainAccount;
+        $data->save();
+
+        if($req->ltype == 'full'){
+            PO::where('id',$req->poId)->update(['actualDeliveryDate' => $req->delivered_dt ]);
+        }
+
+        $notification = array(
+            'message' => 'Shipment status successfully updated.', 
+            'alert-type' => 'success'
+        );
+        $this->send_email($req->shipment_id, 'Delivered');
+        return back()->with('notification',$notification);
+
+    }
+
+    public function send_email($logistic_id,$status){
+        $l = logistics::where('id',$logistic_id)->first();
+        $p = PO::where('id',$l->poId)->first();
+
+       
+        require '../vendor/autoload.php';
+        
+        
+        $mail = new PHPMailer(true);
+            
+           // $mail->SMTPDebug = SMTP::DEBUG_SERVER;    
+            $mail->isSMTP();                                           
+            $mail->Host       = 'smtp.philsaga.com';  
+            $mail->Port       = 25;                                    
+
+            //Recipients
+            $mail->setFrom(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'));
+            $mail->addBCC('dutablante@philsaga.com', 'Dan Tablante');     // Add a recipient
+            $mail->addBCC('mraquino@philsaga.com', 'Michael Aquino'); 
+            $mail->addBCC('purchasing@philsaga.com', 'Purchasing'); 
+            //$mail->addReplyTo('info@example.com', 'Information');             
+            $emails = explode(",", $p->email_receivers);
+            if( count($emails) > 0 ){
+                foreach($emails as $email){
+                    if( strlen($email) > 2 ){
+                        $mail->addAddress($email);
+                    }
+                }     
+            }
+           
+            $mail->msgHTML(file_get_contents('http://172.16.20.27/ims_v3/email_sender.php?status='.urlencode($status).'&ponumber='.urlencode($p->poNumber).'&supplier='.urlencode($p->supplier_name->name).'&order_date='.urlencode($p->orderDate).'&rq_number='.urlencode($p->rq).'&rq_date='.urlencode($p->rq_date).'&expected_delivery='.urlencode($l->expectedDeliveryDate).'&po_id='.urlencode($l->poId)), __DIR__);
+            // Content
+            $mail->isHTML(true);                                  // Set email format to HTML
+            $mail->Subject = 'PO# '.$p->poNumber.' ('.strtoupper($p->supplier_name->name).') Logistics Update';
+            // $mail->Body    = 'This is the HTML message body <b>in bold!</b>';
+            // $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+
+            $mail->send();
+            
+        
+    }
+}

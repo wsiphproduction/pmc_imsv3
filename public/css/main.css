@@ -1,0 +1,18 @@
+
+
+select {
+    font-size: 0.9rem;
+    padding: 4px 5px;
+}
+.port {
+    padding-left: 37px;
+}
+
+span.select {
+    position: relative;
+    margin-left: -47px;
+}
+
+select#broker_agent {
+    margin-left: 41px;
+}

@@ -1,0 +1,266 @@
+<?php
+
+namespace App;
+use Carbon\Carbon;
+use Auth;
+use DB;
+
+use App\PaymentSchedule;
+use App\drr;
+use Illuminate\Database\Eloquent\Model;
+
+class PO extends Model {
+
+	protected $guarded = [];
+	
+	public $table = 'po';
+
+	public $timestamps = false;
+  
+	public function supplier_name()
+    {
+        return $this->belongsTo('App\supplier', 'supplier');
+    }
+
+    public function country()
+    {
+        return $this->belongsTo('App\Origin', 'origin','country_code');
+    }
+
+############## DASHBOARD ##############
+    public static function totalPOforClosure()
+    {
+    	$total = PO::where('paymentStatus','PAID')->where('deliveryStatus','DELIVERED')->where('status','OPEN')->count();
+
+    	return $total;
+    }
+
+    public static function po_for_closure()
+    {
+    	$data = PO::where('paymentStatus','PAID')->where('deliveryStatus','DELIVERED')->where('status','OPEN')->get();
+    	$output = "";
+
+        foreach($data as $d){
+            $output .= '<li>
+                            <a href="'.route('po.search').'?&poNumber='.$d->poNumber.'">
+                                <span class="details">
+                                 	<span class="label label-sm label-icon label-success md-skip">PO#'.$d->poNumber.'</span> '.$d->supplier_name->name.'</span>
+                            </a>
+                        </li>';
+        }
+
+        return $output;
+    }
+
+    public static function totalOpenPO()
+    {
+    	$total = PO::where('status','OPEN')->count();
+
+    	return $total;
+    }
+
+    public static function totalOverduePO()
+    {
+    	$total = PO::where('expectedCompletionDate','<',Carbon::today())->where('status','OPEN')->count();
+
+    	return $total;
+    }
+
+    public static function totalPoOpen($month,$year)
+    {
+    	$total = PO::whereYear('expectedCompletionDate',$year)->whereMonth('expectedCompletionDate',$month)->where('status','OPEN')->count();
+
+    	return $total;
+    }
+
+    public static function totalCompletionOfTheMonth()
+    {
+    	$total = PO::whereBetween('expectedCompletionDate',[Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])->where('status','OPEN')->count();
+
+    	return $total;
+    }
+
+
+	public static function poMonthlyEntry($month,$year)
+	{
+		$total = PO::whereYear('addedDate',$year)->whereMonth('addedDate',$month)->count();
+
+		return $total;
+	}
+
+	public static function poMonthlyClosed($month,$year)
+	{
+		$total = PO::whereYear('closedDate',$year)->whereMonth('closedDate',$month)->count();
+
+		return $total;
+	}
+
+	public static function totalOverduePO_new()
+    {
+    	$total = 0;
+    	$pos = PO::where('expectedCompletionDate','<',Carbon::today())->where('status','OPEN')->get();
+
+    	foreach($pos as $po){
+    		if($po->incoterms == 'EXW' || $po->incoterms == 'CPT' || $po->incoterms == 'CIP'){
+    			$logistics = \App\logistics::where('poId',$po->id)->orderBy('id','desc')->first();
+    			if(empty($logistics)){
+    				$total++;
+    			}
+    			else{
+	    			if($logistics->status == 'Pending'){
+	    				$total++;
+	    			}
+	    		}
+
+    		}
+    		else{
+    			$total++;
+    		}
+    	}
+
+    	return $total;
+    }
+############## DASHBOARD ##############
+
+############## PAYMENT & DELIVERY PROGRESS ##############
+    public static function paymentProgress($amount,$id)
+	{
+		$paid = PaymentSchedule::where('poId','=',$id)->where('isPaid',1)->sum('amount');         
+        $total = ($paid / $amount) * 100;
+            
+        return floor($total * 100) / 100;
+	}
+
+	public static function deliveryProgress($qty,$id)
+	{
+		$delivered = drr::where('poNumber','=',$id)->sum('drrQty');             
+        $total = ($delivered / $qty) * 100;
+
+        return floor($total * 100) / 100;
+
+	}
+############## PAYMENT & DELIVERY PROGRESS ##############
+
+############## PAYMENT & DELIVERY BALANCES ##############
+	public static function drrAmountBalance($id){
+		
+		$rr_amount = drr::where('poNumber',$id)->sum('drrAmount');
+		//logger($rr_amount);
+		$po      = PO::find($id);
+		//logger($po);
+		return number_format($po->amount-$rr_amount,2);
+	}
+
+	public static function DeliveryBalanceStatic($id){
+		
+		$total_delivered = drr::where('poNumber',$id)->sum('drrQty');
+		$po = PO::where('id',$id)->first();
+		
+		return number_format($po->qty-$total_delivered,2);
+	}
+
+	public static function paymentbalance($id){
+		
+		$paid = PaymentSchedule::where('poId','=',$id)->where('isPaid','=','1')->sum('amount');
+		$po   = PO::find($id);
+		$balance = $po->amount - $paid;
+
+		return $balance;
+	}
+
+	public static function PaymentBalanceStatic($id){
+		
+		$paid = PaymentSchedule::where('poId','=',$id)->where('isPaid','=','1')->sum('amount');
+		$po   = PO::find($id);
+		$balance = $po->amount - $paid;
+
+		if($balance == 0){
+			return '<span class="label label-xs label-success">PAID</span>';
+		} else {
+			return number_format($balance,2);
+		}
+	}
+############## PAYMENT & DELIVERY BALANCES ##############
+
+############## GRAPHS & STATISTICS ##############
+	public static function deliveries_per_origin($from,$to)
+    {
+        $result = logistics::leftJoin('po','po.id','=','logistics.poId')->select('origin',DB::raw('COUNT(origin) as totalDelivery'))->where('logistics.status','Delivered')->whereBetween('logistics.actualDeliveryDate',[$from,$to])->groupBy('po.origin')->get()->toArray();
+
+        return $result;
+    }
+############## GRAPHS & STATISTICS ##############
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	public static function checkIfDelivered($id)
+	{
+		$data = PO::where('id',$id)->first();
+
+		return $data->actualDeliveryDate;
+	}
+
+	
+
+	public static function AmountBalanceStatic($id){
+		
+		$paid = PaymentSchedule::where('poId',$id)->where('isPaid','1')->sum('amount');
+		$po   = PO::find($id);
+
+		return number_format($po->amount - $paid,2);
+	}
+
+	public static function paidAmount($id){
+		
+		$total = PaymentSchedule::where('poId','=',$id)->where('isPaid','=','1')->sum('amount');
+
+		return number_format($total,2);
+	}
+
+	public static function DeliveredQty($id)
+	{
+		$total = drr::where('poNumber','=',$id)->sum('drrQty');
+
+		return number_format($total,2);
+	}
+
+	public static function getDeliveredQty($id,$qty){
+		
+		$totaldelivery = \App\drr::where('poNumber','=',$id)->sum('drrQty');
+
+		if($totaldelivery == 0 || $totaldelivery == .00){
+                $qty_percentage = 0;
+        } else {
+            $dd = ($totaldelivery / $qty) * 100;
+                $qty_percentage = floor($dd * 100) / 100;
+        }
+		return $qty_percentage;
+	}
+
+	public static function GetLatestRemarks($id){
+
+		$latestRemarks = \App\remarks::select('remarks')->where('poId','=',$id)->latest('id')->first();
+	
+		if(preg_match('/"(")"/', $latestRemarks, $m)) {
+		    return $m[1];   
+		}
+	}
+
+	public static function filePath(){
+		return '\\\\ftp\FTP\APP_UPLOADED_FILES\ims';
+	}
+
+
+}
