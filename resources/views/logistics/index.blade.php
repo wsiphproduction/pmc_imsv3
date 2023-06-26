@@ -14,16 +14,13 @@
 <div class="page-content">
     <div class="container">
 
-
-        <div class="row">
+        {{-- <div class="row">
             <div class="col-md-12">
                 <a href="{{ url('http://172.16.20.28/PMC-IMS_V3-latest/public/ims/logistics/shipment-waybills') }}" class="btn btn-default"><i class="fa fa-backward"></i> Back</a>
             </div>   
         </div>
-        <br>
-    
+        <br> --}}
 
-        
         <div class="row mb-2">
             <div class="col-xl-12 col-lg-12 col-12 m-auto">
                 <a href="{{route('post.create')}}" class="btn btn-primary btn-sm float-right"> Add New Port Name</a>
@@ -58,9 +55,11 @@
                                 <form action="{{route('post.destroy', $post->id)}}" method="post">
                                 {{-- <a href="{{route('post.show', $post->id)}}" class="btn btn-info btn-sm"> View </a> --}}
                                 <a href="{{route('post.edit', $post->id)}}" class="btn btn-success btn-sm"> Edit </a>
+                                    
                                 @csrf
                                 @method("DELETE")
-                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    <button type="submit" class="first btn btn-danger btn-sm" onclick="alert('confirmed');">Delete</button>
+
                                 </form>
                             </td>
                         </tr>
@@ -79,5 +78,15 @@
 <script src="{{env('APP_URL')}}/assets/global/plugins/jquery-validation/js/additional-methods.min.js" type="text/javascript"></script>
 <script src="{{env('APP_URL')}}/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
 <script src="{{env('APP_URL')}}/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
-
 @endsection
+
+
+<script>
+    $(function() {
+        $('submit.first').confirmButton({
+            confirm: "Are you really sure?"
+        });
+    });
+    </script>
+
+

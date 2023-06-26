@@ -65,7 +65,7 @@
                                             <div class="col-md-3 mt-step-col first @if($waybill->portArrivalDate <> NULL) done @endif">
                                                 <div class="mt-step-number bg-white">
                                                     @if($waybill->status == 'In-Transit' && $waybill->portArrivalDate == NULL)
-                                                        <a href="#modalTransit" data-toggle="modal" data-ship_id="{{$waybill->id}}" class="transitBtn"><i class="fa fa-ship" style="margin-top: 8px;"></i></a>
+                                                    <a href="#modalTransit" data-toggle="modal" data-ship_id="{{$waybill->id}}" class="transitBtn"><i class="fa fa-ship" style="margin-top: 8px;"></i></a>
                                                     @else
                                                         <i class="fa fa-ship" style="margin-top: 8px;"></i>
                                                     @endif
@@ -202,6 +202,7 @@
                         <label class="control-label col-sm-3" for="dt">Port Arrival Date <i class="text-danger">*</i></label>
                         <div class="col-sm-9">
                             <input required style="width: 100%;" name="arrival_dt" class="form-control form-control-inline date-picker" type="text" data-date-format="yyyy-mm-dd" data-date="+0d"/>
+                      {{-- <div class="valid-feedback">Looks good!</div> --}}
                         </div>
                     </div>
 
@@ -214,14 +215,15 @@
 
                     <div class="form-group">
                         <label class="control-label col-sm-3" title="Estimated Time Arrival" for="dt">ETA<i class="text-danger">*</i></label>
-                        <div class="col-sm-9">
-                            <input required style="width: 100%;" name="eta" class="form-control form-control-inline date-picker" type="text" data-date-format="yyyy-mm-dd" data-date="+0d"/>
+                        <div class="col-sm-9 time">
+                            {{-- <input type="date" id="eta" name="eta"> --}}
+                            <input type="datetime-local" id="eta" name="eta">
                         </div>
                     </div>
 
                     <div class="port">
-                    <label for="port" class="select">Select Port Name</label>
-                    <select name="port" id="port">
+                    <label for="port" class="select"><span class="name">Port Name *</span></label>
+                    <select name="port" class="ports" id="port">
                         <option value="">--Please choose an option--</option>
                         @foreach($choose as $selected) 
                         <option value= {{$selected->Portname}}>{{$selected->Portname}}</option>

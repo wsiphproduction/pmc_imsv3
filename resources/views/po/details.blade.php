@@ -58,6 +58,8 @@
                         <p>RQ # : {{ $po->rq }}</p>
                         <p>MRS # : {{ $po->mrs_no }}</p>
                         <p class="text-uppercase">Terms : {{ $po->terms }}</p>
+                        {{-- <p class="text-uppercase">Estimated Time Arrival : {{ $po->eta }}</p>
+                        <p class="text-uppercase">Port Name : {{ $po->port }}</p> --}}
                         <p class="text-uppercase">Lead Time : {{ $po->suppliers_lead_time }}</p>
                     </div>
 

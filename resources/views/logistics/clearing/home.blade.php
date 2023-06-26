@@ -16,12 +16,12 @@
 <div class="container">
 
     
-<div class="row">
+{{-- <div class="row">
     <div class="col-md-12">
         <a href="{{ url('http://172.16.20.28/PMC-IMS_V3-latest/public/ims/logistics/shipment-waybills') }}" class="btn btn-default"><i class="fa fa-backward"></i> Back</a>
     </div>   
 </div>
-<br>
+<br> --}}
 
 
 <div class="row mb-2">
@@ -55,7 +55,7 @@
                         <a href="{{route('company.edit', $companies->id)}}" class="btn btn-success btn-sm"> Edit </a>
                         @csrf
                         @method("DELETE")
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            <button type="submit" class="first btn btn-danger btn-sm" onclick="myFunction()">Delete</button>
                         </form>
                     </td>
                 </tr>
@@ -75,3 +75,15 @@
 <script src="{{env('APP_URL')}}/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
 <script src="{{env('APP_URL')}}/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
 @endsection
+
+<script>
+    function myFunction() {
+      let text = "Press a button!\nEither OK or Cancel.";
+      if (confirm(text) == true) {
+        text = "You pressed OK!";
+      } else {
+        text = "You canceled!";
+      }
+      document.getElementById("demo").innerHTML = text;
+    }
+    </script>
