@@ -215,15 +215,15 @@
 
                     <div class="form-group">
                         <label class="control-label col-sm-3" title="Estimated Time Arrival" for="dt">ETA<i class="text-danger">*</i></label>
-                        <div class="col-sm-9 time">
+                        <div class="col-sm-9 time arrive">
                             {{-- <input type="date" id="eta" name="eta"> --}}
-                            <input type="datetime-local" id="eta" name="eta">
+                            <input type="datetime-local" class="time" id="eta" name="eta">
                         </div>
                     </div>
 
                     <div class="port">
-                    <label for="port" class="select"><span class="name">Port Name *</span></label>
-                    <select name="port" class="ports" id="port">
+                    <label for="col-sm-3 port" class="select"><span class="name">Port Name *</span></label>
+                    <select name="col-sm-9 port" class="ports" id="port">
                         <option value="">--Please choose an option--</option>
                         @foreach($choose as $selected) 
                         <option value= {{$selected->Portname}}>{{$selected->Portname}}</option>
