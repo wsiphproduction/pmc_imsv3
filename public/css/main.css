@@ -16,3 +16,41 @@ span.select {
 select#broker_agent {
     margin-left: 41px;
 }
+
+select#port {
+    margin-left: 24px;
+}
+
+label.select {
+    position: relative;
+    margin-left: 9px;
+}
+
+input#eta {
+    padding-left: 14px;
+}
+
+@media screen and (max-width:612px) {
+
+    input#eta {
+        width: 100%;
+    }
+    select#port{
+    margin-left: -37px;
+    padding-right: 67px;
+
+    }
+    label.select {
+        position: relative;
+        margin-left: -34px;
+    }
+
+    .modal-footer {
+        padding: 15px;
+        text-align: center;
+        border-top: 1px solid #e5e5e5;
+    }
+
+}
+
+
