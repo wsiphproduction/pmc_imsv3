@@ -61,7 +61,7 @@
                                     {{-- <button type="submit" class="first btn btn-danger btn-sm" onclick="alert('confirmed');">Delete</button> --}}
 
                                     <!-- Button trigger modal -->
-                            <button type="submit" class="btn btn-danger" data-mdb-toggle="modal" data-mdb-target="#exampleModal">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('are your sure?')" data-mdb-toggle="modal" data-mdb-target="#exampleModal">
                                 Delete
                             </button>
                             

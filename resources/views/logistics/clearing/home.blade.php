@@ -55,7 +55,7 @@
                         <a href="{{route('company.edit', $company->id)}}" class="btn btn-success btn-sm"> Edit </a>
                         @csrf
                         @method("DELETE")
-                            <button type="submit" class="first btn btn-danger btn-sm" onclick="myFunction()">Delete</button>
+                            <button type="submit" class="first btn btn-danger btn-sm" onclick="return confirm('are your sure?')">Delete</button>
                         </form>
                     </td>
                 </tr>
