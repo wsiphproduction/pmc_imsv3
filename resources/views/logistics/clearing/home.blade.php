@@ -26,7 +26,7 @@
 
 <div class="row mb-2">
     <div class="col-xl-12 col-lg-12 col-12 m-auto">
-        <a href="{{route('company.create')}}" class="btn btn-primary btn-sm float-right"> Add New Broker_Agent</a>
+        <a href="{{route('company.create')}}" class="btn btn-primary btn-sm float-right"> Add New Broker Agent</a>
     </div>
 </div>
 
@@ -36,23 +36,23 @@
     <thead>
         <tr>
             <th> ID </th>
-            <th> Broker_Agent </th>
+            <th> Broker Agent </th>
             <th> Created on </th>
             <th> Action </th>
         </tr>
     </thead>
     <tbody>
-        @if(!@empty($company))
-            @foreach($company as $companies)
+        @if(!@empty($companies))
+            @foreach($companies as $company)
                 <tr>
-                    <td> {{$companies->id}} </td>
-                    <td> {{$companies->broker_agent}} </td>
-                    <td> {{$companies->created_at}} </td>
+                    <td> {{$company->id}} </td>
+                    <td> {{$company->broker_agent}} </td>
+                    <td> {{$company->created_at}} </td>
                     {{-- <td> @if($companies->published == 1) <span class="badge badge-success">Published</span> @else NA @endif </td> --}}
                     <td>
-                        <form action="{{route('company.destroy', $companies->id)}}" method="post">
+                        <form action="{{route('company.destroy', $company->id)}}" method="post">
                         {{-- <a href="{{route('company.show', $companies->id)}}" class="btn btn-info btn-sm"> View </a> --}}
-                        <a href="{{route('company.edit', $companies->id)}}" class="btn btn-success btn-sm"> Edit </a>
+                        <a href="{{route('company.edit', $company->id)}}" class="btn btn-success btn-sm"> Edit </a>
                         @csrf
                         @method("DELETE")
                             <button type="submit" class="first btn btn-danger btn-sm" onclick="myFunction()">Delete</button>
@@ -63,6 +63,19 @@
         @endif
     </tbody>
 </table>
+
+
+ {{-- Start Pagination --}}
+ <div class="row">
+    <div class="col-md-6">
+        <p>Showing {{$colls->firstItem()}} to {{$colls->lastItem()}} of {{$colls->total()}} items</p>
+    </div>
+    <div class="col-md-6">
+        <span class="pull-right">{{ $colls->appends($parameters)->links() }}</span>
+    </div>
+</div>
+{{-- End Pagination --}}
+
 </div>
 </div>
 @endsection

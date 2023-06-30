@@ -34,10 +34,10 @@
                 <tr>
                     <th> ID </th>
                     <th> Portname </th>
-                    {{-- <th> Category </th>
-                    <th> Description </th>
+                     {{-- <th> Category </th>
+                    <th> Description </th> --}}
                     <th> Created on </th>
-                    <th> Status </th> --}}
+                    {{-- <th> Status </th> --}}
                     <th> Action </th>
                 </tr>
             </thead>
@@ -58,8 +58,30 @@
                                     
                                 @csrf
                                 @method("DELETE")
-                                    <button type="submit" class="first btn btn-danger btn-sm" onclick="alert('confirmed');">Delete</button>
+                                    {{-- <button type="submit" class="first btn btn-danger btn-sm" onclick="alert('confirmed');">Delete</button> --}}
 
+                                    <!-- Button trigger modal -->
+                            <button type="submit" class="btn btn-danger" data-mdb-toggle="modal" data-mdb-target="#exampleModal">
+                                Delete
+                            </button>
+                            
+                            <!-- Modal -->
+                            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                                    <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">...</div>
+                                    <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary">Save changes</button>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                           
                                 </form>
                             </td>
                         </tr>
@@ -67,6 +89,19 @@
                 @endif
             </tbody>
         </table>
+        
+    {{-- Start Pagination --}}
+    <div class="row">
+        <div class="col-md-6">
+            <p>Showing {{$collection->firstItem()}} to {{$collection->lastItem()}} of {{$collection->total()}} items</p>
+        </div>
+        <div class="col-md-6">
+            <span class="pull-right">{{ $collection->appends($param)->links() }}</span>
+        </div>
+    </div>
+{{-- End Pagination --}}
+
+
     </div>
 </div>
 @endsection
@@ -79,14 +114,5 @@
 <script src="{{env('APP_URL')}}/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
 <script src="{{env('APP_URL')}}/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
 @endsection
-
-
-<script>
-    $(function() {
-        $('submit.first').confirmButton({
-            confirm: "Are you really sure?"
-        });
-    });
-    </script>
 
 

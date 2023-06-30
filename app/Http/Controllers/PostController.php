@@ -11,6 +11,7 @@ class PostController extends Controller {
     public function index() {
         $posts = Post::all();
         return view("logistics.index", compact("posts"));
+
     }
 
     public function create() {
@@ -99,5 +100,16 @@ class PostController extends Controller {
         else{
             return back()->with("failed", "Failed to delete post");
         }
+    }
+
+    public function port_list($param = null)
+        {
+    $param = [];
+    $collection = Post::whereNotNull('id');
+    $posts = Post::paginate(5);
+    $collection->orderBy('id');
+    $collection = $collection->paginate(5);
+     
+      return view('logistics.index', compact('collection', 'param', 'posts')); 
     }
 }
