@@ -217,19 +217,31 @@
                         <label class="control-label col-sm-3" title="Estimated Time Arrival" for="dt">ETA<i class="text-danger">*</i></label>
                         <div class="col-sm-9 time arrive">
                             {{-- <input type="date" id="eta" name="eta"> --}}
-                            <input type="datetime-local" class="time" id="eta" name="eta">
+                            <input required type="datetime-local" class="time" id="eta" name="eta">
                         </div>
                     </div>
 
                     <div class="port">
                     <label for="col-sm-3 port" class="select"><span class="name">Port Name *</span></label>
-                    <select name="col-sm-9 port" class="ports" id="port">
-                        <option value="">--Please choose an option--</option>
+                    <select name="port" class="ports" id="port">
+                        <option value="#">--Please choose Port Name--</option>
                         @foreach($choose as $selected) 
-                        <option value= {{$selected->Portname}}>{{$selected->Portname}}</option>
+                        <option required value= {{$selected->Portname}}>{{$selected->Portname}}</option>
                         @endforeach
                     </select>   
                         </div>
+
+{{--                         
+                <div class="port" style="margin-left: 46px;">
+                    <label for="agent"><span class="select">Port Name *</span> :</label>
+                    <select name="broker_agent" id="port">
+                        <option value="#">--Please choose Port Name--</option>
+                        @foreach($choose as $selected) 
+                        <option required value = {{$selected->Portname}}>{{$selected->Portname}}</option>
+                        @endforeach
+                    </select>   
+                </div>
+                </div>      --}}
 
                          {{-- <div class="port" style="padding-left: 87px;">
                         <label for="port">Port</label>
@@ -282,18 +294,16 @@
                         <label class="control-label col-sm-3" for="dt">Cleared Date :</label>
                         <div class="col-sm-9">
                             <div class="col-sm-9">
-                                <input style="width: 100%;" name="cleared" class="form-control form-control-inline date-picker" type="text" data-date-format="yyyy-mm-dd" data-date="+0d"/>
+                                <input required style="width: 100%;" name="cleared" class="form-control form-control-inline date-picker" type="text" data-date-format="yyyy-mm-dd" data-date="+0d"/>
                             </div>
                         </div>
                     </div>
-
-                    
 
                      <div class="form-group">
                     <label class="control-label col-sm-3" for="dt">SSDP :</label>
                     <div class="col-sm-9">
                         <div class="col-sm-9">
-                            <input style="width: 100%;" name="ssdp" class="form-control form-control-inline" type="text" required>
+                            <input style="width: 100%;" name="ssdp" class="form-control form-control-inline" type="text">
                         </div>
                     </div>
                 </div>
@@ -301,9 +311,9 @@
                 <div class="port" style="margin-left: 46px;">
                     <label for="agent"><span class="select">Select Agent</span> :</label>
                     <select name="broker_agent" id="broker_agent">
-                        <option value="#">--Please choose an option--</option>
+                        <option value="#">--Please choose Agent--</option>
                         @foreach($pick as $selected) 
-                        <option value= {{$selected->broker_agent}}>{{$selected->broker_agent}}</option>
+                        <option required value = {{$selected->broker_agent}}>{{$selected->broker_agent}}</option>
                         @endforeach
                     </select>   
                 </div>
