@@ -105,11 +105,11 @@ class PostController extends Controller {
     public function port_list($param = null)
         {
     $param = [];
-    $collection = Post::whereNotNull('id');
+    $c = Post::whereNotNull('id');
     $posts = Post::paginate(5);
-    $collection->orderBy('id');
-    $collection = $collection->paginate(5);
+    $c->orderBy('id');
+    $c = $c->paginate(5);
      
-      return view('logistics.index', compact('collection', 'param', 'posts')); 
+      return view('logistics.index', compact('c', 'param', 'posts')); 
     }
 }

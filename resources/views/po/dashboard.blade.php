@@ -58,7 +58,8 @@
 	                    <i class="widget-thumb-icon bg-red icon-layers"></i>
 	                    <div class="widget-thumb-body">
 	                        <span class="widget-thumb-body-stat" data-counter="counterup" data-value="{{ \App\PaymentSchedule::totalOverduePayables() }}">0</span>
-	                    </div>
+                            
+                        </div>
 	                </div>
 	            </div>
         	</a>

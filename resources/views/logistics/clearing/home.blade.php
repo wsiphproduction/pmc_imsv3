@@ -68,10 +68,10 @@
  {{-- Start Pagination --}}
  <div class="row">
     <div class="col-md-6">
-        <p>Showing {{$colls->firstItem()}} to {{$colls->lastItem()}} of {{$colls->total()}} items</p>
+        <p>Showing {{$o->firstItem()}} to {{$o->lastItem()}} of {{$o->total()}} items</p>
     </div>
     <div class="col-md-6">
-        <span class="pull-right">{{ $colls->appends($parameters)->links() }}</span>
+        <span class="pull-right">{{ $o->appends($parameters)->links() }}</span>
     </div>
 </div>
 {{-- End Pagination --}}

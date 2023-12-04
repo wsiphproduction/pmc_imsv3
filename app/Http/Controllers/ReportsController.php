@@ -18,6 +18,7 @@ use App\PO;
 use App\Log;
 use \OwenIt\Auditing\Models\Audit;
 use App\Services\RoleRightService;
+use App\DailyPending;
 
 class ReportsController extends Controller
 {
@@ -213,17 +214,28 @@ class ReportsController extends Controller
     // Overdue Payables
     public function overdue_payables(Request $request)
     {
+     
         $rolesPermissions = $this->roleRightService->hasPermissions("Overdue Payables Reports");
 
         if (!$rolesPermissions['view']) {
             abort(401);
         }
         $collection = PaymentSchedule::where('isPaid', 0)->whereDate('paymentDate', '<', Carbon::today())->orderBy('paymentDate', 'desc')->paginate(15);
-
         $saveLogs = $this->reportService->create("Overdue Payables", $request);
-        return view('reports.overdue_payables', compact('collection'));
 
+         $count = PaymentSchedule::where('isPaid', 0)
+        ->where('paymentDate', '<', now())
+        ->count();
+
+      
+        $totalRecord = new \App\DailyPending;
+        $dailyPending->overdue_payable = $total;
+        $totalRecord->save();
+
+        return view('reports.overdue_payables', compact('collection'));
+       
         //return view('reports.overdue_payables',compact('collection','param'));
+ 
     }
 
     public function errorLogs(Request $request)

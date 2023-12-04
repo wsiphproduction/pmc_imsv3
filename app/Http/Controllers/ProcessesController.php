@@ -12,6 +12,7 @@ use DB;
 use Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Pagination\Paginator;
 use App\Services\RoleRightService;
 
 //Models
@@ -22,6 +23,7 @@ use App\drr;
 use App\logistics;
 use App\remarks;
 use App\AuditLogs;
+use App\DailyPending;
 
 class ProcessesController extends Controller
 {
@@ -31,9 +33,12 @@ class ProcessesController extends Controller
         $this->roleRightService = $roleRightService;
     }
     // MAIN PO
+
     public function dashboard()
     {
+       
         $rolesPermissions = $this->roleRightService->hasPermissions("Dashboard");
+    
         if (!$rolesPermissions['view']) {
             abort(401);
         }
@@ -48,8 +53,26 @@ class ProcessesController extends Controller
             ->orderBy('expectedCompletionDate', 'asc')
             ->get();
 
-        $activities = AuditLogs::orderBy('id', 'desc')->get();
+        $overdue_payables = PaymentSchedule::totalOverduePayables();
+        $overdue_completion = PO::totalOverduePO_new();
+        $total_open_po = PO::totalOpenPO();
 
+        $date_exists = DailyPending::where('date', Carbon::now())->first();
+
+        if($date_exists == null){
+            DailyPending::create([
+                'date' => Carbon::now(),
+                'overdue_payable' => $overdue_payables,
+                'overdue_completion' => $overdue_completion,
+                'total_open_po' => $total_open_po,
+                'created_at' => Carbon::now()->format('Y-m-d H:i'),  
+                'updated_at' => Carbon::now()->format('Y-m-d H:i')
+            ]);
+        }
+
+       
+
+        $activities = AuditLogs::orderBy('id', 'desc')->get();
         return view('po.dashboard', compact(
             'monthly_completion',
             'activities',
@@ -61,12 +84,47 @@ class ProcessesController extends Controller
         ));
     }
 
+ 
+    public function showRecords(Request $request)
+    {
+
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $query = DailyPending::query();
+
+        // if the date column is bigger than or equal for startdate
+        if ($startDate) {
+            $query->whereDate('date', '>=', $startDate);
+        }
+            // if the date column is lower than or equal for startdate
+        if ($endDate) {
+            $query->whereDate('date', '<=', $endDate);
+
+        }
+    
+        $records = $query->get();
+        $paginates = DailyPending::paginate(10);
+        // $data = DailyPending::whereDate('date', '<=', $endDate)
+        // ->whereDate('date', '>=', $startDate)
+        // ->orderBy('date', 'asc')->get();
+
+        return view('po.showrecord', [
+            'records' => $records,
+            'data' => $query,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'paginates' => $paginates
+        ]);
+    }
+    
     public function dashboard2()
     {
+       
         $monthly_completion = PO::whereBetween('expectedCompletionDate', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
             ->orderBy('expectedCompletionDate', 'asc')
             ->get();
-
+    
         return view('po.dashboard2', compact('monthly_completion'));
     }
 
@@ -128,16 +186,17 @@ class ProcessesController extends Controller
 
     public function details($id)
     {
+     
         $po = PO::where('id', $id)->first();
-
+      
         $shipments   = logistics::where('poId', $id)->orderBy('expectedDeliveryDate', 'asc')->get();
         $payments    = PaymentSchedule::where('poId', $id)->orderBy('paymentDate', 'asc')->get();
         $deliveries  = drr::where('poNumber', $id)->orderBy('id', 'desc')->get();
-
+       
         $total_payment    = count($payments);
         $total_shipment   = count($shipments);
         $total_deliveries = count($deliveries);
-
+        
         // Files
         //$old_files = file_get_contents("http://172.16.20.27/ims_v3/migration/old_api.php?d=po&id=".$id);
         $old_files = '';

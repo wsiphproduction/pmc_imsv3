@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        \App\Console\Commands\DailyPendingUpdate::class,
     ];
 
     /**
@@ -24,6 +24,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('update:daily-pending')->hourly(6); 
+        // $schedule->command('update:daily-pending')->everyMinute(); 
+
         // $schedule->command('inspire')
         //          ->hourly();
     }

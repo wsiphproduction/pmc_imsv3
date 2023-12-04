@@ -107,13 +107,13 @@ class CompanyController extends Controller {
 
     public function agent_paginate($parameters = null)
     {
-    // dd('ko');
     $parameters = [];
-    $colls = Company::whereNotNull('id');
+    $o = Company::whereNotNull('id');
     $companies = Company::paginate(5);
-    $colls->orderBy('id');
-    $colls = $colls->paginate(5);
+    $o->orderBy('id');
+    $o = $o->paginate(5);
   
-    return view('logistics.clearing.home', compact('colls', 'parameters', 'companies'));
+    return view('logistics.clearing.home', compact('o', 'parameters', 'companies'));
   }
+
 }

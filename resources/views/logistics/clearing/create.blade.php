@@ -7,7 +7,7 @@
 @endsection
 
 
-@section('title')Create New Broker_Agent @endsection
+@section('title')Create New Broker Agent @endsection
 @section('content')
 
 <div class="page-content">
@@ -35,14 +35,15 @@
                         {{Session::get("failed")}}
                     </div>
                 @endif
-
-                <div class="card-header">
+                    
+                <br>
+                {{-- <div class="card-header">
                     <h5 class="card-title">Crud</h5>
-                </div>
+                </div> --}}
 
                 <div class="card-body">
                     <div class="form-group">
-                        <label for="title">Broker_Agent <span class="text-danger">*</span> </label>
+                        <label for="title">Broker Agent <span class="text-danger">*</span> </label>
                         <input type="text" name="broker_agent" id="broker_agent" class="form-control" placeholder="Enter broker_agent" value="{{old('broker_agent')}}" required/>
                         {!!$errors->first('broker_agent', '<small class="text-danger"> :message </small>') !!}
                     </div>

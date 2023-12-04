@@ -15,7 +15,7 @@
 <div class="page-content">
 <div class="row">
     <div class="col-xl-6 col-lg-6 col-12 m-auto">
-        <a href="{{route('post.index')}}" class="btn btn-danger btn-sm float-right"> Back to Port Name List </a>
+        <a href="{{route('logistics.index')}}" class="btn btn-danger btn-sm float-right"> Back to Port Name List </a>
     </div>
 </div>
 

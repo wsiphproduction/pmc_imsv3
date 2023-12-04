@@ -804,8 +804,6 @@ Chrome and other few mail clients do not support <style> tag so the above conver
                                     ?>
                                     {{-- end delivered --}}
 
-
-
                                     <!-- BEGIN: Note Panel -->
                                     <p>
                                            Please click the following URL to view your PO details:

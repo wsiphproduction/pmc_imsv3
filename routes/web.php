@@ -21,6 +21,8 @@ Route::group(['middleware' => ['authenticated']], function () {
 	// PO List
 
 	Route::get('/ims/dashboard', 'ProcessesController@dashboard')->name('ims.dashboard');
+	Route::get('/ims/totalpending', 'ProcessesController@showRecords')->name('ims.total_pending');
+
 	Route::get('/ims/logout', 'Auth\LoginController@logout')->name('logout');
 	Route::post('/password/change', 'MaintenanceController@passwordChange');
 	
@@ -190,14 +192,16 @@ Route::group(['middleware' => ['authenticated']], function () {
 	// PORT
 	// Route::resource('port', 'PostController');
 	Route::resource('/laravel/post', 'PostController');
-	Route::get('/port', 'PostController@index')->name('logistics.index');
+	Route::get('/port', 'PostController@port_list')->name('logistics.index');
     // END PORT
 
 	// CLEARING
 	Route::resource('/home/company', 'CompanyController');
-	Route::get('/company', 'CompanyController@home')->name('logistics.clearing.home');
+	Route::get('/company', 'CompanyController@agent_paginate')->name('logistics.clearing.home');
 	// END CLEARING
 
+	// SEARCH
+	// Route::get('/users/search', 'PostController@search')->name('logistics.index');
 
 
 	Route::get('/subjects', 'LogisticsController@index')->name('subjects');

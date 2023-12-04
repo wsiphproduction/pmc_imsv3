@@ -24,9 +24,9 @@ use App\Services\RoleRightService;
 
 class LogisticsController extends Controller
 {
-    public function __construct(
-        RoleRightService $roleRightService
-    ) {
+    public function __construct(RoleRightService $roleRightService) 
+    
+    {
         $this->roleRightService = $roleRightService;
     }
     public function dashboard()
@@ -186,14 +186,12 @@ class LogisticsController extends Controller
         return view('logistics.create', compact('poId'));
     }
 
-   
-
     public function waybills($id)
     {
         
         $poId = $id;
         $waybills = logistics::where('poId', $id)->get();
-        // dd($waybills);
+        
 
         $choose = post::get();
         $pick = company::get();
@@ -303,7 +301,7 @@ class LogisticsController extends Controller
 
     public function inTransit(Request $req)
     {
-        // dd($req->arrival_dt);
+        
         $final_eta = Carbon::createFromFormat('Y-m-d\TH:i', $req->eta);    
         $waybill = logistics::where('id', $req->shipment_id)->update([
       
@@ -433,7 +431,7 @@ class LogisticsController extends Controller
                 }
             }
         }
-       
+        
         $emails = explode(",", $p->email_receivers);
         if (count($emails) > 0) {
             foreach ($emails as $email) {

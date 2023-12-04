@@ -4,10 +4,11 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable  as AuditableContract;
 use OwenIt\Auditing\Auditable; 
+use App\DailyPending;
 
 use \Carbon\Carbon;
 
-class PaymentSchedule extends Model  implements AuditableContract
+class PaymentSchedule extends Model implements AuditableContract
 {
 
     use Auditable;
@@ -65,7 +66,22 @@ class PaymentSchedule extends Model  implements AuditableContract
     	$total = PaymentSchedule::where('paymentDate','<',Carbon::today())->where('isPaid',0)->count();
 
     	return $total;	
+       
     }
+
+    // public static function totalOverduePayables()
+    // {
+    //     $total = static::where('paymentDate', '<', Carbon::today())
+    //         ->where('isPaid', 0)
+    //         ->count();
+
+    //     // Save the count into the DailyPending table
+    //     $dailyPending = new \App\DailyPending;
+    //     $dailyPending->overdue_payable = $total;
+    //     $dailyPending->save();
+
+    //     return $total;
+    // }
 
     public static function total_payment_for_the_week()
     {

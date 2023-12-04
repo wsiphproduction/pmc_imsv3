@@ -4,9 +4,7 @@
     <link href="{{env('APP_URL')}}/assets/global/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
     <link href="{{env('APP_URL')}}/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link href="{{env('APP_URL')}}/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
-@endsection
-
-
+    @endsection
 
 @section('title')Post Listing @endsection
 @section('content')
@@ -27,7 +25,17 @@
             </div>
         </div>
 
+        </div>
         <br>
+
+        {{-- <div class="form-inline pull-right">
+            <div class="input-group">
+              <input type="text" name="search" id="search" placeholder="Search..." class="form-control">
+              <span class="input-group-btn">
+                <button class="btn btn-primary"><i class="fa fa-search"></i></button>
+              </span> 
+            </div>
+        </div> --}}
 
         <table class="table table-striped">
             <thead>
@@ -93,14 +101,13 @@
     {{-- Start Pagination --}}
     <div class="row">
         <div class="col-md-6">
-            <p>Showing {{$collection->firstItem()}} to {{$collection->lastItem()}} of {{$collection->total()}} items</p>
+            <p>Showing {{$c->firstItem()}} to {{$c->lastItem()}} of {{$c->total()}} items</p>
         </div>
         <div class="col-md-6">
-            <span class="pull-right">{{ $collection->appends($param)->links() }}</span>
+            <span class="pull-right">{{ $c->appends($param)->links() }}</span>
         </div>
     </div>
 {{-- End Pagination --}}
-
 
     </div>
 </div>
@@ -108,6 +115,7 @@
 
 
 @section('pagejs')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="{{env('APP_URL')}}/assets/global/plugins/select2/js/select2.full.min.js" type="text/javascript"></script>
 <script src="{{env('APP_URL')}}/assets/global/plugins/jquery-validation/js/jquery.validate.min.js" type="text/javascript"></script>
 <script src="{{env('APP_URL')}}/assets/global/plugins/jquery-validation/js/additional-methods.min.js" type="text/javascript"></script>
@@ -115,4 +123,8 @@
 <script src="{{env('APP_URL')}}/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
 @endsection
 
-
+{{-- <script type="text/javascript">
+    jQuery(document).ready(function() {
+        alert("hehehe");
+    });
+</script> --}}

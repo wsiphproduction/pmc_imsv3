@@ -3,6 +3,8 @@
     $modules = explode("|", $assigned_modules);
 @endphp
 
+
+
 <nav class="navbar mega-menu" role="navigation">
     <!-- BEGIN HEADER MENU -->
     <div class="nav-collapse collapse navbar-collapse navbar-responsive-collapse navbar navbar-fixed-top">
@@ -71,7 +73,7 @@
 
 
                         <li>
-                            <a href="{{ route('logistics.index') }}"><i class="fa fa-file-text-o"></i>Port Maintenance</a>
+                            <a href="{{ route('logistics.index') }}"><i class="fa fa-file-text"></i>Port Maintenance</a>
                         </li>
 
                         
@@ -127,6 +129,9 @@
                     </li>
                     <li>
                         <a href="{{ route('audit-logs') }}"> User Actions</a>
+                    </li>
+                     <li>
+                        <a href="{{ route('ims.total_pending') }}"> Pending History</a>
                     </li>
                 </ul>
             </li>
@@ -229,3 +234,6 @@
         </div>
     </div>
 </nav>
+
+
+

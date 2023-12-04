@@ -235,6 +235,7 @@
                                             <td>{{ $shipment->portArrivalDate }}</td>
                                             <td>{{ $shipment->customStartDate }}</td>
                                             <td>{{ $shipment->customClearedDate }}</td>
+                                            {{-- <td>{{ $shipment->actualDeliveryDate }}</td> --}}
                                             <td>{{ $shipment->actualDeliveryDate }}</td>
                                             <td>{{ $shipment->expectedDeliveryDate }}</td>
                                             <td class="text-uppercase">{{ $shipment->status }}</td>

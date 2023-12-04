@@ -4,9 +4,10 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+
 class Post extends Model
 {
     protected $fillable = [
-        "Portname", "slug", "Category", "Description"
+        "Portname", "slug"
     ];
 }

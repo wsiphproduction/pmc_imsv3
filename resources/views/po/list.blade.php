@@ -116,7 +116,7 @@
                         <td><span class="label label-sm label-default">{{ $data->status }}</span></td>
 
                         <td id="btn{{ $data->id }}">
-        @if($data->status == 'OPEN')
+             @if($data->status == 'OPEN')
             <div class="btn-toolbar margin-bottom-2">
                 <div class="btn-group btn-group-sm btn-group-solid">                                                        
                     @if($edit)
