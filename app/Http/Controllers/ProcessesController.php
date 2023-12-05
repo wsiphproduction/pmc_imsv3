@@ -69,7 +69,7 @@ class ProcessesController extends Controller
                 'updated_at' => Carbon::now()->format('Y-m-d H:i')
             ]);
         }
-
+        // $records = DailyPending::orderBy('date', 'asc');
        
 
         $activities = AuditLogs::orderBy('id', 'desc')->get();
@@ -102,9 +102,10 @@ class ProcessesController extends Controller
             $query->whereDate('date', '<=', $endDate);
 
         }
-    
-        $records = $query->get();
+
+        $query->orderBy('date', 'asc');
         $paginates = DailyPending::paginate(10);
+        $records = $query->get();
         // $data = DailyPending::whereDate('date', '<=', $endDate)
         // ->whereDate('date', '>=', $startDate)
         // ->orderBy('date', 'asc')->get();
@@ -114,8 +115,39 @@ class ProcessesController extends Controller
             'data' => $query,
             'start_date' => $startDate,
             'end_date' => $endDate,
-            'paginates' => $paginates
+            'paginates' => $paginates,
         ]);
+    }
+
+    public function performance(Request $request)
+    {
+        $purchaseOrders = DB::table('po')
+        ->leftJoin('supplier as s', 's.id', '=', 'po.supplier')
+        ->select(
+            's.name as supplier_name',
+            'poNumber',
+            'expectedDeliveryDate',
+            'actualDeliveryDate',
+            DB::raw('DATEDIFF(day, expectedDeliveryDate, actualDeliveryDate) as late_days')
+        )
+        ->whereNotNull('actualDeliveryDate');
+    
+    // Add a condition for supplier input if it is not null
+    if ($request->filled('supplierInput')) {
+        $purchaseOrders->where('s.name', $request->supplierInput);
+    }
+    
+    $purchaseOrders = $purchaseOrders->paginate(10)->appends($request->except('page'));
+   
+        // $supplierNames = supplier::pluck('name');
+        $supplierNames = DB::table('supplier')
+        ->join('po', 'po.supplier', '=', 'supplier.id')
+        ->select('supplier.name as supplier_name')
+        ->whereNotNull('po.actualDeliveryDate')
+        ->distinct()
+        ->get();
+
+        return view('po.supplier_delivery_performance', compact('purchaseOrders', 'supplierNames', 'request'));
     }
     
     public function dashboard2()
