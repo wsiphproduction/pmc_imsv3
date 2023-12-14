@@ -133,6 +133,9 @@
                      <li>
                         <a href="{{ route('ims.total_pending') }}"> Pending History</a>
                     </li>
+                    <li>
+                        <a href="{{ route('ims.supplier_delivery_performance') }}">Supplier Delivery Performance</a>
+                    </li>
                 </ul>
             </li>
 
