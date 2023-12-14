@@ -53,6 +53,7 @@ class ProcessesController extends Controller
             ->orderBy('expectedCompletionDate', 'asc')
             ->get();
 
+        // display the total record to dashboard from each table
         $overdue_payables = PaymentSchedule::totalOverduePayables();
         $overdue_completion = PO::totalOverduePO_new();
         $total_open_po = PO::totalOpenPO();
@@ -93,22 +94,21 @@ class ProcessesController extends Controller
 
         $query = DailyPending::query();
 
-        // if the date column is bigger than or equal for startdate
+             // if the date column is bigger than or equal for startdate
         if ($startDate) {
             $query->whereDate('date', '>=', $startDate);
         }
             // if the date column is lower than or equal for startdate
         if ($endDate) {
             $query->whereDate('date', '<=', $endDate);
-
         }
 
         $query->orderBy('date', 'asc');
-        $paginates = DailyPending::paginate(10);
+        $paginates = DailyPending::paginate(5);
         $records = $query->get();
-        // $data = DailyPending::whereDate('date', '<=', $endDate)
-        // ->whereDate('date', '>=', $startDate)
-        // ->orderBy('date', 'asc')->get();
+
+        $show = true;
+       
 
         return view('po.showrecord', [
             'records' => $records,
@@ -116,12 +116,16 @@ class ProcessesController extends Controller
             'start_date' => $startDate,
             'end_date' => $endDate,
             'paginates' => $paginates,
+            'show' => $show,
         ]);
     }
 
     public function performance(Request $request)
     {
-        $purchaseOrders = DB::table('po')
+       
+        $show = false;
+
+        $query = DB::table('po')
         ->leftJoin('supplier as s', 's.id', '=', 'po.supplier')
         ->select(
             's.name as supplier_name',
@@ -130,24 +134,47 @@ class ProcessesController extends Controller
             'actualDeliveryDate',
             DB::raw('DATEDIFF(day, expectedDeliveryDate, actualDeliveryDate) as late_days')
         )
-        ->whereNotNull('actualDeliveryDate');
+        ->whereNotNull('actualDeliveryDate')
+        ->orderBy('actualDeliveryDate', 'desc'); 
     
-    // Add a condition for supplier input if it is not null
-    if ($request->filled('supplierInput')) {
-        $purchaseOrders->where('s.name', $request->supplierInput);
-    }
     
-    $purchaseOrders = $purchaseOrders->paginate(10)->appends($request->except('page'));
-   
-        // $supplierNames = supplier::pluck('name');
-        $supplierNames = DB::table('supplier')
-        ->join('po', 'po.supplier', '=', 'supplier.id')
-        ->select('supplier.name as supplier_name')
-        ->whereNotNull('po.actualDeliveryDate')
-        ->distinct()
-        ->get();
+        if ($request->filled('supplierInput')) {
+            $query->where('s.name', $request->supplierInput);
+            $show = true;
+        }
+        
 
-        return view('po.supplier_delivery_performance', compact('purchaseOrders', 'supplierNames', 'request'));
+        $res = $query->get();
+
+        $failedCount = $res->where('late_days', '>', 0)->count();
+       
+        $passedCount = $res->where('late_days', '<', 0)->count();
+
+
+        $purchaseOrders = $query->paginate(5)->appends($request->except('page'));
+        $lateDaysData = $purchaseOrders->pluck('late_days')->toArray();
+       
+        
+        // Fetch distinct supplier names
+        $supplierNames = DB::table('supplier')
+            ->leftJoin('po', 'po.supplier', '=', 'supplier.id')
+            ->select('supplier.name as supplier_name')
+            ->whereNotNull('po.actualDeliveryDate')
+            ->distinct()
+            ->get();
+
+        // dd($supplierNames);
+
+
+        return view('po.supplier_delivery_performance', compact(
+            'purchaseOrders', 
+            'supplierNames', 
+            'request', 
+            'lateDaysData', 
+            'failedCount', 
+            'passedCount',
+            'show'
+        ));
     }
     
     public function dashboard2()
