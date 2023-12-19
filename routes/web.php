@@ -21,9 +21,11 @@ Route::group(['middleware' => ['authenticated']], function () {
 	// PO List
 
 	Route::get('/ims/dashboard', 'ProcessesController@dashboard')->name('ims.dashboard');
+	
+	// new update for reports
 	Route::get('/ims/totalpending', 'ProcessesController@showRecords')->name('ims.total_pending');
 	Route::get('/ims/supplier_delivery_performance', 'ProcessesController@performance')->name('ims.supplier_delivery_performance');
-
+	
 
 	Route::get('/ims/logout', 'Auth\LoginController@logout')->name('logout');
 	Route::post('/password/change', 'MaintenanceController@passwordChange');
